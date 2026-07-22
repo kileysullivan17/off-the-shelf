@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
+/* Shared design-system primitives — cool-violet skin of the delivered
+ * reference (design/design/design-reference.html). Ink on paper, hairline
+ * rules, mono chips; flat color everywhere except the hero surfaces. */
+
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`rounded-2xl bg-white shadow-sm border border-stone-200 ${className}`}>
+    <div className={`rounded-2xl bg-white border border-rule-2 ${className}`}>
       {children}
     </div>
   )
@@ -10,25 +14,30 @@ export function Card({ children, className = '' }: { children: ReactNode; classN
 
 export function SectionHeader({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex items-center justify-between mt-5 mb-2 px-1">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-500">{children}</h2>
+    <div className="mt-6 mb-2 flex items-center justify-between rounded-md bg-tint px-3 py-1.5">
+      <h2 className="font-mono text-[11px] font-bold uppercase tracking-[.1em] text-ink">{children}</h2>
       {action}
     </div>
   )
 }
 
 const badgeTones = {
-  amber: 'bg-amber-100 text-amber-800',
-  teal: 'bg-brand-100 text-brand-800',
-  red: 'bg-red-100 text-red-700',
-  blue: 'bg-sky-100 text-sky-800',
-  stone: 'bg-stone-200 text-stone-600',
-  green: 'bg-emerald-100 text-emerald-800',
+  amber: 'bg-amber-tint text-amber border-amber-border',
+  violet: 'bg-violet-tint text-violet-deep border-violet-border',
+  magenta: 'bg-magenta-tint text-magenta-ink border-magenta-border',
+  red: 'bg-danger-tint text-danger border-danger-border',
+  teal: 'bg-sub-tint text-sub border-sub-border',
+  blue: 'bg-moved-tint text-moved border-moved-border',
+  stone: 'bg-parked-tint text-parked border-rule-2',
+  green: 'bg-bought-tint text-bought border-bought-border',
+  member: 'bg-transparent text-ink border-ink', // member tag — text, never color
 } as const
 
 export function Badge({ tone = 'stone', children }: { tone?: keyof typeof badgeTones; children: ReactNode }) {
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${badgeTones[tone]}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[.04em] ${badgeTones[tone]}`}
+    >
       {children}
     </span>
   )
@@ -45,7 +54,7 @@ export function PrimaryButton({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-xl bg-brand-700 text-white font-semibold px-4 py-3 active:bg-brand-800 disabled:opacity-40 ${className}`}
+      className={`inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 font-mono text-[13px] font-extrabold uppercase tracking-[.08em] text-paper active:opacity-85 disabled:opacity-40 ${className}`}
     >
       {children}
     </button>
@@ -59,7 +68,7 @@ export function GhostButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-700 active:bg-stone-100 ${className}`}
+      className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border-2 border-ink bg-transparent px-3 py-2 font-mono text-[12px] font-extrabold uppercase tracking-[.06em] text-ink active:bg-tint ${className}`}
     >
       {children}
     </button>
@@ -73,10 +82,10 @@ export function Sheet({
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal>
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] max-h-[85dvh] overflow-y-auto">
-        <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-stone-300" />
-        {title && <h3 className="mb-3 text-base font-semibold">{title}</h3>}
+      <div className="absolute inset-0 bg-ink/50" onClick={onClose} />
+      <div className="absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl bg-paper p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(20,24,27,.24)]">
+        <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-rule-2" />
+        {title && <h3 className="mb-3 border-b border-rule pb-2 text-xl font-extrabold tracking-tight">{title}</h3>}
         {children}
       </div>
     </div>
@@ -92,7 +101,7 @@ export function StarRating({ value, onChange }: { value: number | null; onChange
           type="button"
           disabled={!onChange}
           onClick={() => onChange?.(n)}
-          className={n <= (value ?? 0) ? 'text-amber-500' : 'text-stone-300'}
+          className={n <= (value ?? 0) ? 'text-violet-deep' : 'text-rule-2'}
           aria-label={`${n} star${n > 1 ? 's' : ''}`}
         >
           ★
@@ -114,7 +123,7 @@ export async function fileToDataUrl(file: File, maxDim = 700): Promise<string> {
 }
 
 export function PhotoInput({
-  label = '📷 Attach photo', onPhoto,
+  label = 'Attach photo', onPhoto,
 }: { label?: string; onPhoto: (dataUrl: string) => void }) {
   const ref = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
@@ -144,10 +153,15 @@ export function PhotoInput({
 }
 
 export function EmptyState({ children }: { children: ReactNode }) {
-  return <p className="py-8 text-center text-sm text-stone-500">{children}</p>
+  return (
+    <div className="flex flex-col items-center py-10 text-center">
+      <div className="h-12 w-12 rounded-xl border-[3px] border-dashed border-rule-2" />
+      <p className="mt-4 max-w-[260px] text-sm font-semibold text-ink-soft">{children}</p>
+    </div>
+  )
 }
 
-/** Auto-dismissing confirmation blip. */
+/** Auto-dismissing confirmation blip — the ink pill at the thumb. */
 export function useToast(): [ReactNode, (msg: string) => void] {
   const [msg, setMsg] = useState<string | null>(null)
   useEffect(() => {
@@ -156,8 +170,10 @@ export function useToast(): [ReactNode, (msg: string) => void] {
     return () => clearTimeout(t)
   }, [msg])
   const node = msg ? (
-    <div className="fixed bottom-24 inset-x-0 z-50 flex justify-center pointer-events-none">
-      <div className="rounded-full bg-stone-900/90 text-white text-sm px-4 py-2">{msg}</div>
+    <div className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center">
+      <div className="rounded-full bg-ink px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[.06em] text-paper shadow-lg">
+        {msg}
+      </div>
     </div>
   ) : null
   return [node, setMsg]

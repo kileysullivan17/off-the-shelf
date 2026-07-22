@@ -6,9 +6,12 @@ import {
 } from '../lib/tripLogic'
 import { norm, uid, type Item, type ItemStatus } from '../lib/types'
 import {
-  Badge, Card, EmptyState, GhostButton, PhotoInput, PrimaryButton,
+  Badge, EmptyState, GhostButton, PhotoInput, PrimaryButton,
   SectionHeader, Sheet, StarRating, useToast,
 } from '../components/ui'
+import {
+  BasketIcon, CameraIcon, CheckIcon, PauseIcon, SunIcon, SwapIcon, XIcon,
+} from '../components/icons'
 
 /** Tap cycle (D7): needed → bought → out of stock → substituted → needed. */
 const NEXT_STATUS: Partial<Record<ItemStatus, ItemStatus>> = {
@@ -19,14 +22,59 @@ const NEXT_STATUS: Partial<Record<ItemStatus, ItemStatus>> = {
   substituted: 'needed',
 }
 
-const STATUS_GLYPH: Record<ItemStatus, { glyph: string; cls: string; label: string }> = {
-  needed: { glyph: '', cls: 'border-stone-300', label: 'needed' },
-  in_cart: { glyph: '🛒', cls: 'border-brand-600', label: 'in cart' },
-  bought: { glyph: '✓', cls: 'border-emerald-500 bg-emerald-500 text-white', label: 'bought' },
-  out_of_stock: { glyph: '⊘', cls: 'border-red-400 bg-red-400 text-white', label: 'out of stock' },
-  substituted: { glyph: '↺', cls: 'border-sky-500 bg-sky-500 text-white', label: 'substituted' },
-  moved: { glyph: '→', cls: 'border-stone-300 text-stone-400', label: 'moved' },
-  parked: { glyph: '⏸', cls: 'border-stone-300 text-stone-400', label: 'parked' },
+const STATUS_LABEL: Record<ItemStatus, string> = {
+  needed: 'needed',
+  in_cart: 'in cart',
+  bought: 'bought',
+  out_of_stock: 'out of stock',
+  substituted: 'substituted',
+  moved: 'moved',
+  parked: 'parked',
+}
+
+/** The box zone — 24px status box, glyph + word discipline (never color alone). */
+function StatusBox({ status }: { status: ItemStatus }) {
+  const base = 'flex h-6 w-6 items-center justify-center rounded-md'
+  switch (status) {
+    case 'needed':
+      return <span className={`${base} border-[2.5px] border-ink`} />
+    case 'in_cart':
+      return (
+        <span className={`${base} border-[2.5px] border-violet-deep bg-violet-tint text-violet-deep`}>
+          <BasketIcon size={14} />
+        </span>
+      )
+    case 'bought':
+      return (
+        <span className={`${base} bg-bought text-paper`}>
+          <CheckIcon size={14} />
+        </span>
+      )
+    case 'out_of_stock':
+      return (
+        <span className={`${base} border-[2.5px] border-danger bg-danger-tint text-danger`}>
+          <XIcon size={12} />
+        </span>
+      )
+    case 'substituted':
+      return (
+        <span className={`${base} bg-sub text-paper`}>
+          <SwapIcon size={14} />
+        </span>
+      )
+    case 'moved':
+      return (
+        <span className={`${base} border-[2.5px] border-moved text-moved`}>
+          <SwapIcon size={14} />
+        </span>
+      )
+    case 'parked':
+      return (
+        <span className={`${base} border-[2.5px] border-dashed border-parked text-parked`}>
+          <PauseIcon size={11} />
+        </span>
+      )
+  }
 }
 
 export function TripMode() {
@@ -63,7 +111,9 @@ export function TripMode() {
     return (
       <div className="p-4">
         <EmptyState>Trip not found.</EmptyState>
-        <Link to="/" className="block text-center font-medium text-brand-700">← Plan a run</Link>
+        <Link to="/" className="block text-center font-mono text-[12px] font-bold uppercase tracking-[.06em] text-violet-deep">
+          ← Plan a run
+        </Link>
       </div>
     )
   }
@@ -174,134 +224,180 @@ export function TripMode() {
     })
   }
 
+  const progress = storeItems.length ? Math.round((doneCount / storeItems.length) * 100) : 0
+
   return (
-    <div className="p-4">
+    <div>
       {toast}
-      <div className="mb-1 flex items-baseline justify-between">
-        <h1 className="text-2xl font-bold">{store.name}</h1>
-        <Link to={`/history`} className="text-sm font-medium text-brand-700">🔎 memory</Link>
+
+      {/* header band */}
+      <div className="border-b border-rule px-4 pb-3 pt-4">
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-2xl font-extrabold tracking-tight">{store.name}</h1>
+            <p className="mt-0.5 font-mono text-[11px] font-semibold uppercase tracking-[.06em] text-ink-soft">
+              {cityLabel} · stop {stopIdx + 1}/{stops.length}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="font-mono text-xl font-bold leading-none">
+              {doneCount}
+              <span className="text-ink-mute">/{storeItems.length}</span>
+            </p>
+            <p className="mt-1 font-mono text-[10px] font-semibold uppercase tracking-[.08em] text-ink-soft">handled</p>
+          </div>
+          <Link
+            to="/history"
+            className="rounded-full border-[1.5px] border-rule-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[.04em] text-ink-soft"
+          >
+            Memory
+          </Link>
+        </div>
+        <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-rule">
+          <div className="h-full bg-ink transition-all" style={{ width: `${progress}%` }} />
+        </div>
       </div>
-      <p className="mb-3 text-sm text-stone-500">
-        {cityLabel} run · stop {stopIdx + 1} of {stops.length} · {doneCount}/{storeItems.length} handled
-      </p>
 
       {/* stop switcher */}
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+      <div className="flex gap-2 overflow-x-auto border-b border-rule px-4 py-2.5">
         {stops.map((s, i) => {
           const st = storeById(db, s.store_id)
           return (
             <button
               key={s.store_id}
               onClick={() => setStopIdx(i)}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ${
-                i === stopIdx ? 'bg-brand-700 text-white' : 'bg-white border border-stone-300 text-stone-600'
+              className={`shrink-0 rounded-full px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[.04em] ${
+                i === stopIdx ? 'bg-ink text-paper' : 'border-[1.5px] border-rule-2 text-ink-soft'
               }`}
             >
-              {i + 1}. {st?.name ?? '?'}
+              {i + 1} · {st?.name ?? '?'}
             </button>
           )
         })}
       </div>
 
-      {returns.length > 0 && (
-        <Card className="mb-4 border-red-200 bg-red-50 p-3">
-          <p className="mb-1 text-sm font-semibold text-red-700">↩︎ Returns to drop off here</p>
-          {returns.map((r) => (
-            <div key={r.id} className="flex items-center gap-2 py-1">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{r.item_name}</p>
-                {r.reason && <p className="text-xs text-stone-500">{r.reason}</p>}
-              </div>
-              <GhostButton onClick={() => mutate.mutate((s) => s.upsertReturn({ ...r, status: 'done' }))}>
-                Done ✓
-              </GhostButton>
+      <div className="px-0 pb-4">
+        {returns.length > 0 && (
+          <div className="border-b border-rule">
+            <div className="flex items-center bg-danger-tint px-4 py-1.5">
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[.1em] text-danger">
+                Returns — drop off here
+              </span>
             </div>
-          ))}
-        </Card>
-      )}
+            {returns.map((r) => (
+              <div key={r.id} className="flex min-h-[54px] items-center gap-3 border-b border-rule px-4 py-2 last:border-b-0">
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold">{r.item_name}</p>
+                  {r.reason && (
+                    <p className="font-mono text-[11px] font-semibold text-ink-soft">{r.reason}</p>
+                  )}
+                </div>
+                <GhostButton onClick={() => mutate.mutate((s) => s.upsertReturn({ ...r, status: 'done' }))}>
+                  Done ✓
+                </GhostButton>
+              </div>
+            ))}
+          </div>
+        )}
 
-      {storeItems.length === 0 && <EmptyState>Nothing on the list for this stop.</EmptyState>}
+        {storeItems.length === 0 && <EmptyState>Nothing on the list for this stop.</EmptyState>}
 
-      <div className="space-y-2">
-        {storeItems.map((item) => {
-          const code = aisleFor(db, store.id, item.name)
-          const glyph = STATUS_GLYPH[item.status]
-          const done = item.status !== 'needed' && item.status !== 'in_cart'
-          const member = memberName(db, item.member_id)
-          return (
-            <Card key={item.id} className={`p-3 ${done ? 'opacity-60' : ''}`}>
-              <div className="flex items-start gap-3">
+        <div>
+          {storeItems.map((item) => {
+            const code = aisleFor(db, store.id, item.name)
+            const done = item.status !== 'needed' && item.status !== 'in_cart'
+            const member = memberName(db, item.member_id)
+            return (
+              <div
+                key={item.id}
+                className={`flex min-h-[54px] items-stretch gap-2 border-b border-rule py-1.5 pr-2.5 ${done ? 'opacity-55' : ''}`}
+              >
+                {/* box zone — the deliberate left reach; only this changes status */}
                 <button
                   onClick={() => cycle(item)}
-                  aria-label={`status: ${glyph.label} — tap to change`}
-                  className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-base font-bold ${glyph.cls}`}
+                  aria-label={`status: ${STATUS_LABEL[item.status]} — tap to change`}
+                  className="flex w-[46px] shrink-0 items-center justify-center self-stretch"
                 >
-                  {glyph.glyph}
+                  <StatusBox status={item.status} />
                 </button>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                    <span className={`font-semibold ${done ? 'line-through' : ''}`}>{item.name}</span>
-                    {item.quantity_note && <span className="text-sm text-stone-500">{item.quantity_note}</span>}
-                    {!item.heat_safe && <span title="perishable — keep cool">🧊</span>}
-                  </div>
-                  {item.instruction_note && (
-                    <p className="mt-0.5 rounded-lg bg-amber-50 px-2 py-1 text-[13px] font-medium text-amber-800">
-                      ⚠️ {item.instruction_note}
-                    </p>
+                <div className="min-w-0 flex-1 self-center">
+                  <p className={`text-base font-bold leading-[21px] tracking-tight ${done ? 'line-through decoration-2' : ''}`}>
+                    {item.name}
+                    {item.status === 'substituted' && <> <Badge tone="teal">Sub’d</Badge></>}
+                    {item.status === 'out_of_stock' && <> <Badge tone="red">Out</Badge></>}
+                  </p>
+                  {(item.instruction_note || member || !item.heat_safe || item.photo_requested || item.quantity_note) && (
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      {item.instruction_note && (
+                        <span className="rounded bg-highlight px-1.5 py-px text-[13px] font-bold leading-[18px]">
+                          {item.instruction_note}
+                        </span>
+                      )}
+                      {item.quantity_note && (
+                        <span className="font-mono text-[12px] font-bold text-ink-soft">{item.quantity_note}</span>
+                      )}
+                      {!item.heat_safe && (
+                        <Badge tone="amber">
+                          <SunIcon size={10} /> keep cool
+                        </Badge>
+                      )}
+                      {item.photo_requested && (
+                        <Badge tone="stone">
+                          <CameraIcon size={10} /> pic?
+                        </Badge>
+                      )}
+                      {member && <Badge tone="member">{member}</Badge>}
+                    </div>
                   )}
-                  <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                    <button
-                      onClick={() => setAisleEdit({ item, code: code ?? '' })}
-                      className="rounded-full bg-stone-200 px-2 py-0.5 text-[11px] font-semibold text-stone-600"
-                    >
-                      {code ? `aisle ${code}` : '+ aisle'}
-                    </button>
-                    {member && <Badge tone="teal">{member}</Badge>}
-                    {item.status === 'substituted' && <Badge tone="blue">substituted</Badge>}
-                    {item.status === 'out_of_stock' && <Badge tone="red">out of stock</Badge>}
-                    {item.photo_requested && <Badge tone="amber">📷 photo requested</Badge>}
-                  </div>
                   {item.photo_requested && (
                     <div className="mt-2">
-                      <PhotoInput label="📷 Send pic before buying" onPhoto={(url) => attachPhoto(item, url)} />
+                      <PhotoInput label="Send pic before buying" onPhoto={(url) => attachPhoto(item, url)} />
                     </div>
                   )}
                 </div>
-                <button
-                  onClick={() => setActionItem(item)}
-                  aria-label={`more actions for ${item.name}`}
-                  className="px-1 text-xl text-stone-400"
-                >
-                  ⋯
-                </button>
+                <div className="flex shrink-0 flex-col items-end justify-center gap-1">
+                  <button
+                    onClick={() => setAisleEdit({ item, code: code ?? '' })}
+                    className="rounded-md bg-chip px-1.5 py-0.5 font-mono text-[12px] font-bold"
+                  >
+                    {code ?? '+ aisle'}
+                  </button>
+                  <button
+                    onClick={() => setActionItem(item)}
+                    aria-label={`more actions for ${item.name}`}
+                    className="px-1 font-mono text-base font-bold leading-none text-ink-mute"
+                  >
+                    ⋯
+                  </button>
+                </div>
               </div>
-            </Card>
-          )
-        })}
-      </div>
+            )
+          })}
+        </div>
 
-      {trip.errands.length > 0 && (
-        <>
-          <SectionHeader>Errands on this run</SectionHeader>
-          <Card className="p-3">
-            {trip.errands.map((e) => (
-              <label key={e.id} className="flex items-center gap-3 py-1.5">
-                <input type="checkbox" checked={e.done} onChange={() => toggleErrand(e.id)} className="h-5 w-5 accent-teal-700" />
-                <span className={`text-sm ${e.done ? 'text-stone-400 line-through' : ''}`}>{e.text}</span>
-              </label>
-            ))}
-          </Card>
-        </>
-      )}
-
-      <div className="mt-5">
-        {stopIdx < stops.length - 1 ? (
-          <PrimaryButton className="w-full" onClick={() => { setStopIdx(stopIdx + 1); window.scrollTo(0, 0) }}>
-            Next stop → {storeById(db, stops[stopIdx + 1].store_id)?.name}
-          </PrimaryButton>
-        ) : (
-          <PrimaryButton className="w-full" onClick={finishTrip}>Finish trip ✓</PrimaryButton>
+        {trip.errands.length > 0 && (
+          <div className="px-4">
+            <SectionHeader>Errands on this run</SectionHeader>
+            <div>
+              {trip.errands.map((e) => (
+                <label key={e.id} className="flex min-h-[44px] items-center gap-3 border-b border-rule py-1.5 last:border-b-0">
+                  <input type="checkbox" checked={e.done} onChange={() => toggleErrand(e.id)} className="h-5 w-5 accent-violet" />
+                  <span className={`text-sm font-semibold ${e.done ? 'text-ink-mute line-through' : ''}`}>{e.text}</span>
+                </label>
+              ))}
+            </div>
+          </div>
         )}
+
+        <div className="mt-5 px-4">
+          {stopIdx < stops.length - 1 ? (
+            <PrimaryButton className="w-full" onClick={() => { setStopIdx(stopIdx + 1); window.scrollTo(0, 0) }}>
+              Next stop → {storeById(db, stops[stopIdx + 1].store_id)?.name}
+            </PrimaryButton>
+          ) : (
+            <PrimaryButton className="w-full" onClick={finishTrip}>Finish trip ✓</PrimaryButton>
+          )}
+        </div>
       </div>
 
       {/* ------- bought: confirm aisle + optional rating (behaviors 3 & 5) ------- */}
@@ -309,19 +405,21 @@ export function TripMode() {
         {buySheet && (
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-stone-600">
-                Aisle at {store.name} (so next trip is pre-sorted)
+              <label className="mb-1.5 block font-mono text-[11px] font-bold uppercase tracking-[.08em] text-ink-soft">
+                Aisle at {store.name} — next trip pre-sorts
               </label>
               <input
                 value={buySheet.code}
                 onChange={(e) => setBuySheet({ ...buySheet, code: e.target.value })}
                 placeholder="e.g. G37"
                 autoCapitalize="characters"
-                className="w-full rounded-xl border border-stone-300 px-3 py-3 text-lg"
+                className="w-full rounded-[10px] border-2 border-ink bg-paper px-3.5 py-3 font-mono text-lg font-bold"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-stone-600">Quick rating (optional)</label>
+              <label className="mb-1.5 block font-mono text-[11px] font-bold uppercase tracking-[.08em] text-ink-soft">
+                Quick rating (optional)
+              </label>
               <StarRating value={buySheet.rating} onChange={(v) => setBuySheet({ ...buySheet, rating: v })} />
             </div>
             <PrimaryButton className="w-full" onClick={saveBuy}>Save</PrimaryButton>
@@ -330,20 +428,27 @@ export function TripMode() {
       </Sheet>
 
       {/* ------- substituted: note + review flag (D8) ------- */}
-      <Sheet open={!!subSheet} onClose={saveSub} title={subSheet ? `Substituted ${subSheet.item.name}` : ''}>
+      <Sheet open={!!subSheet} onClose={saveSub} title={subSheet ? `Substituting: ${subSheet.item.name}` : ''}>
         {subSheet && (
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-stone-600">What did you get instead?</label>
+              <label className="mb-1.5 block font-mono text-[11px] font-bold uppercase tracking-[.08em] text-ink-soft">
+                What did you get instead?
+              </label>
               <input
                 value={subSheet.note}
                 onChange={(e) => setSubSheet({ ...subSheet, note: e.target.value })}
                 placeholder="brand / size / kind"
-                className="w-full rounded-xl border border-stone-300 px-3 py-3"
+                className="w-full rounded-[10px] border-2 border-ink bg-paper px-3.5 py-3 text-base font-bold"
               />
             </div>
-            <p className="text-sm text-stone-500">This flags “what do you think?” on the review screen.</p>
-            <PrimaryButton className="w-full" onClick={saveSub}>Save</PrimaryButton>
+            <div className="rounded-xl border-[1.5px] border-magenta-border bg-magenta-tint px-3.5 py-3">
+              <p className="text-[15px] font-extrabold text-magenta-ink">Flags “what do you think?”</p>
+              <p className="mt-0.5 font-mono text-[10px] font-semibold uppercase tracking-[.04em] text-ink-soft">
+                They see sub’d + your note at home
+              </p>
+            </div>
+            <PrimaryButton className="w-full" onClick={saveSub}>Confirm sub</PrimaryButton>
           </div>
         )}
       </Sheet>
@@ -357,7 +462,7 @@ export function TripMode() {
               onChange={(e) => setAisleEdit({ ...aisleEdit, code: e.target.value })}
               placeholder="e.g. A11B1"
               autoCapitalize="characters"
-              className="w-full rounded-xl border border-stone-300 px-3 py-3 text-lg"
+              className="w-full rounded-[10px] border-2 border-ink bg-paper px-3.5 py-3 font-mono text-lg font-bold"
             />
             <PrimaryButton
               className="w-full"
@@ -384,7 +489,9 @@ export function TripMode() {
       <Sheet open={!!actionItem} onClose={() => setActionItem(null)} title={actionItem?.name}>
         {actionItem && (
           <div className="space-y-2">
-            <p className="text-sm font-medium text-stone-600">Move to another store (“x HD”)</p>
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[.08em] text-ink-soft">
+              Move to another store (“x HD”)
+            </p>
             <div className="flex flex-wrap gap-2">
               {chainNames.map((n) => (
                 <GhostButton key={n} onClick={() => moveToStore(actionItem, n)}>{n}</GhostButton>
@@ -398,17 +505,17 @@ export function TripMode() {
                   showToast('Parked — not deleted')
                 }}
               >
-                ⏸ Park it (“not yet”)
+                Park — not yet
               </GhostButton>
               <Link
                 to={`/history?q=${encodeURIComponent(actionItem.name)}`}
-                className="rounded-xl border border-stone-300 bg-white px-3 py-2 text-center text-sm font-medium text-stone-700"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border-2 border-ink px-3 py-2 text-center font-mono text-[12px] font-extrabold uppercase tracking-[.06em] text-ink"
               >
-                🧠 What did we think?
+                What did we think?
               </Link>
             </div>
             <div className="mt-2">
-              <PhotoInput label="📷 Snap & ask home" onPhoto={(url) => { attachPhoto(actionItem, url); setActionItem(null) }} />
+              <PhotoInput label="Snap & ask home" onPhoto={(url) => { attachPhoto(actionItem, url); setActionItem(null) }} />
             </div>
           </div>
         )}
