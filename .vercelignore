@@ -1,0 +1,6 @@
+planner
+node_modules
+dist
+.git
+*.md
+!README.md
