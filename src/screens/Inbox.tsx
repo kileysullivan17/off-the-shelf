@@ -71,7 +71,7 @@ export function Inbox() {
     <button
       onClick={() => setTab(t)}
       className={`flex-1 rounded-full px-3 py-2.5 font-mono text-[12px] font-extrabold uppercase tracking-[.06em] ${
-        tab === t ? 'bg-ink text-paper' : 'border-[1.5px] border-rule-2 text-ink-soft'
+        tab === t ? 'bg-paper text-ink' : 'border-[1.5px] border-paper/70 text-paper'
       }`}
     >
       {label}{count > 0 && ` · ${count}`}
@@ -81,7 +81,7 @@ export function Inbox() {
   return (
     <div>
       {toast}
-      <div className="border-b border-rule px-4 pb-3.5 pt-4">
+      <div className="bg-hero px-4 pb-3.5 pt-4 text-paper">
         <h1 className="text-[28px] font-extrabold leading-8 tracking-tight">Questions & returns</h1>
         <div className="mt-3 flex gap-2">
           {tabBtn('questions', 'Questions', openQ)}

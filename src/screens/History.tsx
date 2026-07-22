@@ -60,9 +60,9 @@ export function History() {
   return (
     <div>
       {toast}
-      <div className="border-b border-rule px-4 pb-3.5 pt-4">
+      <div className="bg-hero px-4 pb-3.5 pt-4 text-paper">
         <h1 className="text-[28px] font-extrabold leading-8 tracking-tight">Memory</h1>
-        <div className="mt-3 flex items-center gap-2.5 rounded-xl border-2 border-ink px-3.5 py-3">
+        <div className="mt-3 flex items-center gap-2.5 rounded-xl bg-paper px-3.5 py-3 text-ink">
           <SearchIcon size={17} />
           <input
             value={query}

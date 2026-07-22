@@ -95,9 +95,9 @@ export function PlanRun() {
   return (
     <div>
       {toast}
-      <div className="border-b border-rule px-4 pb-3.5 pt-4">
+      <div className="bg-hero px-4 pb-3.5 pt-4 text-paper">
         <h1 className="text-[28px] font-extrabold leading-8 tracking-tight">Plan a run</h1>
-        <p className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-[.06em] text-ink-soft">
+        <p className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-[.06em]">
           Where are you headed? Cold rides shortest.
         </p>
       </div>

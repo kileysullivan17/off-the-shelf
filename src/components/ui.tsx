@@ -54,7 +54,7 @@ export function PrimaryButton({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 font-mono text-[13px] font-extrabold uppercase tracking-[.08em] text-paper active:opacity-85 disabled:opacity-40 ${className}`}
+      className={`bg-hero inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl px-4 py-3 font-mono text-[13px] font-extrabold uppercase tracking-[.08em] text-paper active:opacity-85 disabled:opacity-40 ${className}`}
     >
       {children}
     </button>

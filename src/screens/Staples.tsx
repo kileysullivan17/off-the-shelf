@@ -38,19 +38,19 @@ export function Staples() {
   return (
     <div>
       {toast}
-      <div className="border-b border-rule px-4 pb-3.5 pt-4">
+      <div className="bg-hero px-4 pb-3.5 pt-4 text-paper">
         <div className="flex items-baseline justify-between">
           <h1 className="text-[28px] font-extrabold leading-8 tracking-tight">Staples</h1>
           {missing.length > 0 && (
             <button
               onClick={readdAll}
-              className="rounded-full border-[1.5px] border-rule-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[.04em] text-ink-soft"
+              className="rounded-full border-[1.5px] border-paper/70 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[.04em]"
             >
               Re-add all ({missing.length})
             </button>
           )}
         </div>
-        <p className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-[.06em] text-ink-soft">
+        <p className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-[.06em]">
           Tap a cell → back on its store’s list
         </p>
       </div>

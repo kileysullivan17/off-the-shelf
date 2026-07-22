@@ -64,6 +64,13 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Signature gradient — hero surfaces ONLY (header band, primary button).
+ * Everything else stays flat for bright-store legibility. Both stops carry
+ * paper text at AA (see contrast-check: paper on violet, paper on magenta). */
+.bg-hero {
+  background-image: linear-gradient(135deg, var(--color-violet), var(--color-magenta));
+}
+
 body {
   @apply bg-paper text-ink antialiased;
   font-family: var(--font-sans);

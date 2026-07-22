@@ -230,31 +230,31 @@ export function TripMode() {
     <div>
       {toast}
 
-      {/* header band */}
-      <div className="border-b border-rule px-4 pb-3 pt-4">
+      {/* header band — hero surface, the one gradient beside the primary button */}
+      <div className="bg-hero px-4 pb-3 pt-4 text-paper">
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-2xl font-extrabold tracking-tight">{store.name}</h1>
-            <p className="mt-0.5 font-mono text-[11px] font-semibold uppercase tracking-[.06em] text-ink-soft">
+            <p className="mt-0.5 font-mono text-[11px] font-semibold uppercase tracking-[.06em]">
               {cityLabel} · stop {stopIdx + 1}/{stops.length}
             </p>
           </div>
           <div className="text-right">
             <p className="font-mono text-xl font-bold leading-none">
               {doneCount}
-              <span className="text-ink-mute">/{storeItems.length}</span>
+              <span className="opacity-70">/{storeItems.length}</span>
             </p>
-            <p className="mt-1 font-mono text-[10px] font-semibold uppercase tracking-[.08em] text-ink-soft">handled</p>
+            <p className="mt-1 font-mono text-[10px] font-semibold uppercase tracking-[.08em]">handled</p>
           </div>
           <Link
             to="/history"
-            className="rounded-full border-[1.5px] border-rule-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[.04em] text-ink-soft"
+            className="rounded-full border-[1.5px] border-paper/70 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[.04em]"
           >
             Memory
           </Link>
         </div>
-        <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-rule">
-          <div className="h-full bg-ink transition-all" style={{ width: `${progress}%` }} />
+        <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-ink/25">
+          <div className="h-full bg-paper transition-all" style={{ width: `${progress}%` }} />
         </div>
       </div>
 

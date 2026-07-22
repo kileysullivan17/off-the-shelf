@@ -62,7 +62,7 @@ function More() {
   ]
   return (
     <div>
-      <div className="border-b border-rule px-4 pb-3.5 pt-4">
+      <div className="bg-hero px-4 pb-3.5 pt-4 text-paper">
         <h1 className="text-[28px] font-extrabold leading-8 tracking-tight">More</h1>
       </div>
       <div className="px-4">
