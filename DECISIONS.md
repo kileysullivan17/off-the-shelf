@@ -168,5 +168,7 @@ renamed: the localStorage key 'island-shopping-db-v1' in LocalStore.ts
 key, invisible to users), and historical entries/screenshot filenames that
 record the old URL as it was. Post-rename check: Vercel kept the old
 island-shopping-companion.vercel.app alias serving the same deployment, so
-existing home-screen PWA installs keep working; off-the-shelf.vercel.app is
-the canonical URL going forward.
+existing home-screen PWA installs keep working. Caveat found later:
+off-the-shelf.vercel.app itself was already owned by an unrelated project
+(the .vercel.app namespace is global), so the canonical public URL is
+offtheshelf.vercel.app, attached 2026-07-22.

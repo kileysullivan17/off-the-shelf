@@ -78,7 +78,7 @@ UI is identical in both modes.
 
 - **One shared household account** — no per-user auth, roles, or realtime
   presence. Schema designed so multi-user is additive (see DECISIONS.md D11).
-- **Deployed** — live at [off-the-shelf.vercel.app](https://off-the-shelf.vercel.app)
+- **Deployed** — live at [offtheshelf.vercel.app](https://offtheshelf.vercel.app)
   as a PWA in the cool-violet "Off the Shelf" design (see design/ for the
   retint package and verify screenshots). Pushes to main auto-deploy.
 - **Trips/reactions as jsonb** rather than child tables (D6).
