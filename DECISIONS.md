@@ -140,3 +140,22 @@ its standing list shows only when tapped. Generalized from "Amazon" to any store
 with no city (city_id null), so the bubble is future-proof if another online
 store is added; a per-item store badge appears only when more than one online
 store exists. Buying still writes a purchase record noted "ordered online".
+
+## D22 — Cool-violet retint tokens (2026-07-22)
+The delivered redesign's warm paper palette collided with the portfolio's other
+warm apps, so Off the Shelf becomes the cool member of the family (see
+design/design/RECOLOR-DIRECTION.md and design/implementation-prompt.md). Token
+mapping judgment calls, all verified by scripts/contrast-check.mjs (31/31 AA,
+checklist text AAA):
+- in-cart takes the violet (#6d4ac9 family) — it is the action-in-progress
+  state and the brief makes violet the dominant action color.
+- substituted takes the deep teal in-cart vacated; moved takes blue; parked
+  stays slate. Semantics unchanged, dot + label always.
+- COLD/heat marker inverts to the one warm signal (amber on #fdecc8) — the
+  lone warm note on a cool field reads as "watch the heat."
+- Note highlight goes mustard → soft violet tint (#e9e1f9), ink text.
+- Stops darkened during audit: ink-mute #6b757e → #68727b, danger #a8202d →
+  #a01e2a (both were just under their minimums).
+- brand-* aliases point at the violet ramp so unmigrated screens render the
+  new hue; the aliases are removed once the screen retint commits land.
+Reversible: yes — tokens are one block in src/index.css.

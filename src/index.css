@@ -1,11 +1,70 @@
 @import 'tailwindcss';
 
+/*
+ * Off the Shelf — cool violet retint of the delivered design system.
+ * Shared bones with the rest of the family (ink-on-light, dot+label status,
+ * same type scale); this app owns the cool temperature. See
+ * design/design/RECOLOR-DIRECTION.md and scripts/contrast-check.mjs — every
+ * pair below is verified there. Run: npm run contrast
+ */
 @theme {
-  --color-brand-50: #f0fdfa;
-  --color-brand-100: #ccfbf1;
-  --color-brand-600: #0d9488;
-  --color-brand-700: #0f766e;
-  --color-brand-800: #115e59;
+  /* core */
+  --color-paper: #f7f9fa; /* ground — cool near-white, NOT cream */
+  --color-ink: #14181b; /* body text, always */
+  --color-ink-soft: #525c64; /* meta text */
+  --color-ink-mute: #68727b; /* decorative meta, large only */
+  --color-rule: #e4e9ec; /* hairlines */
+  --color-rule-2: #cbd4da; /* borders */
+  --color-tint: #edf1f4; /* section bands */
+  --color-chip: #e7ecef; /* aisle/code chip bg */
+  --color-highlight: #e9e1f9; /* note highlight — the one loud thing, ink text */
+
+  /* primary accent — violet (buttons, active, checkboxes, selected) */
+  --color-violet: #6d4ac9; /* fills + borders; white text verified */
+  --color-violet-deep: #4a2fa6; /* violet as text/status ink */
+  --color-violet-tint: #ede8fa;
+  --color-violet-border: #cfc3f0;
+
+  /* secondary pop — magenta (review/attention flags only, never large fills) */
+  --color-magenta: #b0479e;
+  --color-magenta-ink: #8e2e7e;
+  --color-magenta-tint: #f8e7f4;
+  --color-magenta-border: #e9c4e1;
+
+  /* status ramp — dot + label, never color alone */
+  --color-bought: #186034; /* green fill + ink */
+  --color-bought-tint: #e3f0e7;
+  --color-bought-border: #bbdcc4;
+  --color-danger: #a01e2a; /* out of stock */
+  --color-danger-tint: #fbe6e8;
+  --color-danger-border: #f1c4c9;
+  --color-sub: #0a5a6b; /* substituted — deep teal */
+  --color-sub-tint: #dff0f4;
+  --color-sub-border: #b7dce6;
+  --color-moved: #1d4e9e; /* moved to another store — blue */
+  --color-moved-tint: #e4edfa;
+  --color-moved-border: #bfd4f2;
+  --color-parked: #55606a; /* parked — dashed slate */
+  --color-parked-tint: #ebeff2;
+
+  /* heat-safe marker — the ONE warm signal on the cool field */
+  --color-amber: #8a5a00;
+  --color-amber-tint: #fdecc8;
+  --color-amber-border: #eacb84;
+
+  /* on-ink surfaces (pills, dark buttons, toasts) */
+  --color-lavender: #c9b8f2; /* accent text on ink — replaces the mustard */
+
+  /* legacy aliases — screens migrate off these in the screen-retint commits */
+  --color-brand-50: #ede8fa;
+  --color-brand-100: #ede8fa;
+  --color-brand-600: #6d4ac9;
+  --color-brand-700: #5b3bae;
+  --color-brand-800: #4a2fa6;
+
+  /* type — Archivo for UI, IBM Plex Mono for codes/meta */
+  --font-sans: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 html {
@@ -13,8 +72,13 @@ html {
 }
 
 body {
-  @apply bg-stone-100 text-stone-900 antialiased;
+  @apply bg-paper text-ink antialiased;
+  font-family: var(--font-sans);
   overscroll-behavior-y: none;
+}
+
+::selection {
+  background: var(--color-highlight);
 }
 
 /* iOS momentum + comfortable one-thumb targets everywhere */
