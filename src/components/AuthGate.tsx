@@ -71,7 +71,8 @@ function LoginScreen({ onSignIn }: { onSignIn: (e: string, p: string) => Promise
     <div className="grid min-h-dvh place-items-center p-6">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
-          <h1 className="text-3xl font-black tracking-tight">Island Shopping</h1>
+          {/* wordmark — flat violet, never the gradient (crisp at small sizes) */}
+          <h1 className="text-3xl font-black tracking-tight text-violet-deep">Off the Shelf</h1>
           <p className="mt-1.5 font-mono text-[11px] font-semibold uppercase tracking-[.08em] text-ink-soft">
             Sign in to the household account
           </p>

@@ -1,11 +1,11 @@
 {
-  "name": "Island Shopping Companion",
-  "short_name": "Shopping",
-  "description": "City runs, aisle-sorted lists, and household purchase memory for Hawaii Island shopping.",
+  "name": "Off the Shelf",
+  "short_name": "Off the Shelf",
+  "description": "City runs, aisle-sorted lists, and household purchase memory. The cool one on the shelf.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f5f5f4",
-  "theme_color": "#0f766e",
+  "background_color": "#f7f9fa",
+  "theme_color": "#6d4ac9",
   "icons": [
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
