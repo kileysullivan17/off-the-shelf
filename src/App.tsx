@@ -8,35 +8,41 @@ import { History } from './screens/History'
 import { Inbox } from './screens/Inbox'
 import { PasteImport } from './screens/PasteImport'
 import { Settings } from './screens/Settings'
-import { Card } from './components/ui'
+import {
+  ChevronIcon, ClockIcon, DotsIcon, PlusIcon, RouteIcon, StaplesIcon,
+} from './components/icons'
 
 const tabs = [
-  { to: '/', label: 'Plan', icon: '🗺️' },
-  { to: '/add', label: 'Add', icon: '➕' },
-  { to: '/staples', label: 'Staples', icon: '🔁' },
-  { to: '/history', label: 'History', icon: '🧠' },
-  { to: '/more', label: 'More', icon: '⋯' },
+  { to: '/', label: 'Runs', icon: RouteIcon },
+  { to: '/add', label: 'Add', icon: PlusIcon },
+  { to: '/staples', label: 'Staples', icon: StaplesIcon },
+  { to: '/history', label: 'Memory', icon: ClockIcon },
+  { to: '/more', label: 'More', icon: DotsIcon },
 ]
 
 function TabBar({ attention }: { attention: boolean }) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto flex max-w-md">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-rule-2 bg-paper/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+      <div className="mx-auto flex max-w-md px-2 pt-1.5 pb-1">
         {tabs.map((t) => (
           <NavLink
             key={t.to}
             to={t.to}
             end={t.to === '/'}
             className={({ isActive }) =>
-              `relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
-                isActive ? 'text-brand-700' : 'text-stone-500'
+              `relative flex flex-1 flex-col items-center gap-1 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[.08em] ${
+                isActive ? 'text-ink' : 'text-ink-mute'
               }`
             }
           >
-            <span className="text-lg leading-none">{t.icon}</span>
-            {t.label}
-            {t.label === 'More' && attention && (
-              <span className="absolute right-1/2 top-1 mr-[-18px] h-2 w-2 rounded-full bg-red-500" />
+            {({ isActive }) => (
+              <>
+                <t.icon size={20} />
+                <span className={isActive ? 'border-b-2 border-ink pb-0.5' : 'pb-[3px]'}>{t.label}</span>
+                {t.label === 'More' && attention && (
+                  <span className="absolute right-1/2 top-0 mr-[-18px] h-2 w-2 rounded-full bg-magenta" />
+                )}
+              </>
             )}
           </NavLink>
         ))}
@@ -50,31 +56,32 @@ function More() {
   const openQuestions = db?.questions.filter((q) => q.status === 'open').length ?? 0
   const pendingReturns = db?.returns.filter((r) => r.status === 'pending').length ?? 0
   const links = [
-    { to: '/inbox', label: 'Questions & returns', icon: '💬', badge: openQuestions + pendingReturns },
-    { to: '/import', label: 'Paste import', icon: '📋', badge: 0 },
-    { to: '/settings', label: 'Settings', icon: '⚙️', badge: 0 },
+    { to: '/inbox', label: 'Questions & returns', badge: openQuestions + pendingReturns },
+    { to: '/import', label: 'Paste import', badge: 0 },
+    { to: '/settings', label: 'Settings', badge: 0 },
   ]
   return (
-    <div className="p-4">
-      <h1 className="mb-4 text-2xl font-bold">More</h1>
-      <Card>
-        {links.map((l, i) => (
+    <div>
+      <div className="border-b border-rule px-4 pb-3.5 pt-4">
+        <h1 className="text-[28px] font-extrabold leading-8 tracking-tight">More</h1>
+      </div>
+      <div className="px-4">
+        {links.map((l) => (
           <Link
             key={l.to}
             to={l.to}
-            className={`flex items-center gap-3 px-4 py-4 ${i > 0 ? 'border-t border-stone-100' : ''}`}
+            className="flex min-h-[56px] items-center gap-3 border-b border-rule py-3"
           >
-            <span className="text-xl">{l.icon}</span>
-            <span className="flex-1 font-medium">{l.label}</span>
+            <span className="flex-1 text-base font-bold tracking-tight">{l.label}</span>
             {l.badge > 0 && (
-              <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
+              <span className="rounded-full bg-magenta-tint border border-magenta-border px-2 py-0.5 font-mono text-[11px] font-bold text-magenta-ink">
                 {l.badge}
               </span>
             )}
-            <span className="text-stone-400">›</span>
+            <ChevronIcon size={16} className="text-ink-mute" />
           </Link>
         ))}
-      </Card>
+      </div>
     </div>
   )
 }

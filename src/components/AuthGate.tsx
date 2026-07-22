@@ -30,7 +30,11 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   if (!auth) return <>{children}</>
   if (!ready) {
-    return <div className="grid min-h-dvh place-items-center text-stone-400">Connecting…</div>
+    return (
+      <div className="grid min-h-dvh place-items-center font-mono text-[12px] font-bold uppercase tracking-[.1em] text-ink-mute">
+        Connecting…
+      </div>
+    )
   }
   // Flip the gate the moment sign-in succeeds rather than depending solely on
   // the onAuthChange event, which can be swallowed if the auth lock stalls.
@@ -61,15 +65,16 @@ function LoginScreen({ onSignIn }: { onSignIn: (e: string, p: string) => Promise
     // on success, onAuthChange flips the gate — no further work here
   }
 
-  const input = 'w-full rounded-xl border border-stone-300 bg-white px-3 py-3'
+  const input = 'w-full rounded-[10px] border-2 border-ink bg-paper px-3.5 py-3 text-base font-bold placeholder:font-semibold placeholder:text-ink-mute'
 
   return (
     <div className="grid min-h-dvh place-items-center p-6">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
-          <div className="text-5xl">🛒🌴</div>
-          <h1 className="mt-3 text-2xl font-bold">Island Shopping</h1>
-          <p className="mt-1 text-sm text-stone-500">Sign in to the household account</p>
+          <h1 className="text-3xl font-black tracking-tight">Island Shopping</h1>
+          <p className="mt-1.5 font-mono text-[11px] font-semibold uppercase tracking-[.08em] text-ink-soft">
+            Sign in to the household account
+          </p>
         </div>
         <form onSubmit={submit}>
           <Card className="space-y-3 p-4">
@@ -91,14 +96,16 @@ function LoginScreen({ onSignIn }: { onSignIn: (e: string, p: string) => Promise
               placeholder="password"
               className={input}
             />
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && (
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[.04em] text-danger">{error}</p>
+            )}
             <PrimaryButton type="submit" className="w-full" disabled={busy || !email || !password}>
               {busy ? 'Signing in…' : 'Sign in'}
             </PrimaryButton>
           </Card>
         </form>
-        <p className="mt-4 text-center text-xs text-stone-400">
-          One shared login for everyone in the household. Ask whoever set it up for the password.
+        <p className="mt-4 text-center font-mono text-[10px] font-semibold uppercase tracking-[.04em] leading-4 text-ink-mute">
+          One shared login for everyone in the household
         </p>
       </div>
     </div>

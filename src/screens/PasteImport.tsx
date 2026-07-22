@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useDB, useMutate } from '../lib/store'
 import { parseImport, type ParsedLine } from '../lib/importParser'
 import { norm, uid, type Item } from '../lib/types'
-import { Card, EmptyState, GhostButton, PrimaryButton, useToast } from '../components/ui'
+import { EmptyState, GhostButton, PrimaryButton, useToast } from '../components/ui'
 
 interface ReviewRow extends ParsedLine {
   include: boolean
@@ -68,72 +68,81 @@ export function PasteImport() {
     showToast(`${items.length} items added${skipped ? ` · ${skipped} skipped (no store)` : ''} ✓`)
   }
 
-  const input = 'w-full rounded-lg border border-stone-300 px-2 py-1.5 text-sm'
+  const cell = 'w-full rounded-lg border-[1.5px] border-rule-2 bg-paper px-2 py-1.5 font-mono text-[13px] font-semibold placeholder:text-ink-mute'
 
   return (
-    <div className="p-4">
+    <div>
       {toast}
-      <h1 className="mb-1 text-2xl font-bold">Paste import</h1>
-      <p className="mb-4 text-sm text-stone-500">
-        Paste the raw list — store lines, * and x markers, “x 2”, aisle codes, (notes) all understood.
-      </p>
+      <div className="border-b border-rule px-4 pb-3.5 pt-4">
+        <h1 className="text-[28px] font-extrabold leading-8 tracking-tight">Paste a list</h1>
+        <p className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-[.06em] text-ink-soft">
+          Texts, notes, transcripts — anything
+        </p>
+      </div>
 
-      {!rows && (
-        <>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            rows={12}
-            placeholder={'Target\n* bibs G37\nmilk x 2\nsunscreen (reef-safe only)\n\nKTA\npoi\nramen x4 (not the spicy one)'}
-            className="w-full rounded-2xl border border-stone-300 bg-white p-3 font-mono text-sm"
-          />
-          <PrimaryButton className="mt-3 w-full" onClick={parse} disabled={!text.trim()}>
-            Parse it →
-          </PrimaryButton>
-        </>
-      )}
+      <div className="px-4 py-4">
+        {!rows && (
+          <>
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={12}
+              placeholder={'Target\n* bibs G37\nmilk x 2\nsunscreen (reef-safe only)\n\nKTA\npoi\nramen x4 (not the spicy one)'}
+              className="w-full rounded-xl border-2 border-ink bg-paper p-3.5 font-mono text-sm font-medium leading-6 placeholder:text-ink-mute"
+            />
+            <PrimaryButton className="mt-3 w-full" onClick={parse} disabled={!text.trim()}>
+              Parse {text.trim() ? `${text.trim().split('\n').filter(Boolean).length} lines` : 'it'} →
+            </PrimaryButton>
+          </>
+        )}
 
-      {rows && (
-        <>
-          <p className="mb-2 text-sm font-medium text-stone-600">
-            Review — {rows.filter((r) => r.include).length} of {rows.length} selected
-          </p>
-          <div className="space-y-2">
-            {rows.map((r, i) => (
-              <Card key={i} className={`p-3 ${r.include ? '' : 'opacity-50'}`}>
-                <div className="flex items-start gap-2">
-                  <input
-                    type="checkbox"
-                    checked={r.include}
-                    onChange={(e) => update(i, { include: e.target.checked })}
-                    className="mt-1.5 h-5 w-5 accent-teal-700"
-                  />
-                  <div className="grid min-w-0 flex-1 grid-cols-2 gap-1.5">
-                    <input value={r.name} onChange={(e) => update(i, { name: e.target.value })} className={`${input} col-span-2 font-medium`} />
+        {rows && (
+          <>
+            <p className="mb-2 font-mono text-[11px] font-bold uppercase tracking-[.06em] text-ink-soft">
+              Check my guesses — {rows.filter((r) => r.include).length} of {rows.length} selected · nothing saves until you say so
+            </p>
+            <div className="space-y-2.5">
+              {rows.map((r, i) => (
+                <div key={i} className={`rounded-xl border-[1.5px] border-rule-2 p-3 ${r.include ? '' : 'opacity-50'}`}>
+                  <div className="flex items-start gap-2.5">
                     <input
-                      value={r.store_name ?? ''}
-                      onChange={(e) => update(i, { store_name: e.target.value })}
-                      list="import-chains"
-                      placeholder="store?"
-                      className={`${input} ${!r.store_name ? 'border-red-300 bg-red-50' : ''}`}
+                      type="checkbox"
+                      checked={r.include}
+                      onChange={(e) => update(i, { include: e.target.checked })}
+                      className="mt-1.5 h-5 w-5 accent-violet"
                     />
-                    <input value={r.quantity_note ?? ''} onChange={(e) => update(i, { quantity_note: e.target.value || null })} placeholder="qty" className={input} />
-                    <input value={r.aisle_code ?? ''} onChange={(e) => update(i, { aisle_code: e.target.value || null })} placeholder="aisle" className={input} />
-                    <input value={r.instruction_note ?? ''} onChange={(e) => update(i, { instruction_note: e.target.value || null })} placeholder="note" className={input} />
+                    <div className="grid min-w-0 flex-1 grid-cols-2 gap-1.5">
+                      <input value={r.name} onChange={(e) => update(i, { name: e.target.value })} className={`${cell} col-span-2 font-sans text-[15px] font-bold`} />
+                      <input
+                        value={r.store_name ?? ''}
+                        onChange={(e) => update(i, { store_name: e.target.value })}
+                        list="import-chains"
+                        placeholder="store?"
+                        className={`${cell} ${!r.store_name ? 'border-dashed border-danger-border bg-danger-tint' : ''}`}
+                      />
+                      <input value={r.quantity_note ?? ''} onChange={(e) => update(i, { quantity_note: e.target.value || null })} placeholder="qty" className={cell} />
+                      <input value={r.aisle_code ?? ''} onChange={(e) => update(i, { aisle_code: e.target.value || null })} placeholder="aisle" className={cell} />
+                      <input value={r.instruction_note ?? ''} onChange={(e) => update(i, { instruction_note: e.target.value || null })} placeholder="note" className={cell} />
+                    </div>
                   </div>
                 </div>
-              </Card>
-            ))}
-          </div>
-          <datalist id="import-chains">
-            {chainNames.map((n) => <option key={n} value={n} />)}
-          </datalist>
-          <div className="mt-3 flex gap-2">
-            <GhostButton className="flex-1" onClick={() => setRows(null)}>← Edit text</GhostButton>
-            <PrimaryButton className="flex-1" onClick={save}>Add items</PrimaryButton>
-          </div>
-        </>
-      )}
+              ))}
+            </div>
+            <datalist id="import-chains">
+              {chainNames.map((n) => <option key={n} value={n} />)}
+            </datalist>
+            <p className="mt-3 text-center font-mono text-[10px] font-semibold uppercase tracking-[.06em] text-ink-soft">
+              Dashed = my guess · fix now or in aisle
+            </p>
+            <div className="mt-2 flex gap-2">
+              <GhostButton className="flex-1" onClick={() => setRows(null)}>← Edit text</GhostButton>
+              <PrimaryButton className="flex-1" onClick={save}>
+                Save {rows.filter((r) => r.include).length} items
+              </PrimaryButton>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   )
 }

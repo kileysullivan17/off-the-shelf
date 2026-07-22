@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useDB, useMutate, useStore } from '../lib/store'
 import { isAuthCapable } from '../lib/store/DataStore'
 import { uid } from '../lib/types'
-import { Badge, Card, EmptyState, GhostButton, PrimaryButton, SectionHeader, useToast } from '../components/ui'
+import { Badge, EmptyState, GhostButton, PrimaryButton, SectionHeader, useToast } from '../components/ui'
 
 export function Settings() {
   const { data: db } = useDB()
@@ -17,7 +17,7 @@ export function Settings() {
 
   if (!db) return <EmptyState>Loading…</EmptyState>
 
-  const input = 'w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5'
+  const input = 'w-full rounded-[10px] border-2 border-ink bg-paper px-3.5 py-2.5 text-base font-bold placeholder:font-semibold placeholder:text-ink-mute'
 
   const saveMembers = () => {
     mutate.mutate(async (s) => {
@@ -59,101 +59,108 @@ export function Settings() {
   }
 
   return (
-    <div className="p-4">
+    <div>
       {toast}
-      <h1 className="mb-4 text-2xl font-bold">Settings</h1>
+      <div className="border-b border-rule px-4 pb-3.5 pt-4">
+        <h1 className="text-[28px] font-extrabold leading-8 tracking-tight">Settings</h1>
+        <p className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-[.06em] text-ink-soft">
+          One account · one household
+        </p>
+      </div>
 
-      <SectionHeader>Household members</SectionHeader>
-      <Card className="space-y-2 p-3">
-        {db.members.map((m) => (
-          <input
-            key={m.id}
-            defaultValue={m.name}
-            onChange={(e) => setNames((n) => ({ ...n, [m.id]: e.target.value }))}
-            className={input}
-            aria-label={`rename ${m.name}`}
-          />
-        ))}
-        <PrimaryButton className="w-full" onClick={saveMembers}>Save names</PrimaryButton>
-      </Card>
-
-      <SectionHeader>Stores & cities</SectionHeader>
-      {db.islands.map((isl) => {
-        const cities = db.cities.filter((c) => c.island_id === isl.id)
-        return (
-          <Card key={isl.id} className="mb-3 p-3">
-            <p className="font-semibold">{isl.name}</p>
-            {cities.length === 0 && <p className="mt-1 text-sm text-stone-500">No cities yet.</p>}
-            {cities.map((c) => (
-              <div key={c.id} className="mt-2">
-                <p className="text-sm font-medium text-stone-600">{c.name}</p>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {db.stores.filter((s) => s.city_id === c.id).map((s) => (
-                    <Badge key={s.id} tone="stone">
-                      {s.name}{s.location_note ? ` (${s.location_note})` : ''}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </Card>
-        )
-      })}
-      <Card className="mb-3 p-3">
-        <p className="font-semibold">Online</p>
-        <div className="mt-1 flex flex-wrap gap-1">
-          {db.stores.filter((s) => !s.city_id).map((s) => (
-            <Badge key={s.id} tone="stone">{s.name}</Badge>
+      <div className="px-4 pb-4">
+        <SectionHeader>Members</SectionHeader>
+        <div className="space-y-2 pt-1">
+          {db.members.map((m) => (
+            <input
+              key={m.id}
+              defaultValue={m.name}
+              onChange={(e) => setNames((n) => ({ ...n, [m.id]: e.target.value }))}
+              className={input}
+              aria-label={`rename ${m.name}`}
+            />
           ))}
+          <PrimaryButton className="w-full" onClick={saveMembers}>Save names</PrimaryButton>
         </div>
-      </Card>
 
-      <Card className="space-y-2 p-3">
-        <p className="text-sm font-semibold text-stone-600">Add a city</p>
-        <div className="flex gap-2">
-          <input value={newCity.name} onChange={(e) => setNewCity({ ...newCity, name: e.target.value })} placeholder="city name" className={input} />
-          <select value={newCity.island_id} onChange={(e) => setNewCity({ ...newCity, island_id: e.target.value })} className={input}>
-            <option value="">island…</option>
-            {db.islands.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
-          </select>
+        <SectionHeader>Stores — by city</SectionHeader>
+        {db.islands.map((isl) => {
+          const cities = db.cities.filter((c) => c.island_id === isl.id)
+          return (
+            <div key={isl.id} className="pt-1">
+              <p className="px-0.5 font-mono text-[12px] font-bold uppercase tracking-[.08em] text-ink-soft">{isl.name}</p>
+              {cities.length === 0 && <p className="mt-1 text-sm font-semibold text-ink-soft">No cities yet.</p>}
+              {cities.map((c) => (
+                <div key={c.id} className="mt-2 border-b border-rule pb-2.5">
+                  <p className="text-base font-extrabold tracking-tight">{c.name}</p>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {db.stores.filter((s) => s.city_id === c.id).map((s) => (
+                      <Badge key={s.id} tone="stone">
+                        {s.name}{s.location_note ? ` (${s.location_note})` : ''}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        })}
+        <div className="mt-2 border-b border-rule pb-2.5">
+          <p className="text-base font-extrabold tracking-tight">Online</p>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {db.stores.filter((s) => !s.city_id).map((s) => (
+              <Badge key={s.id} tone="stone">{s.name}</Badge>
+            ))}
+          </div>
         </div>
-        <GhostButton className="w-full" onClick={addCity}>+ Add city</GhostButton>
 
-        <p className="pt-2 text-sm font-semibold text-stone-600">Add a store (a store = name + city)</p>
-        <input value={newStore.name} onChange={(e) => setNewStore({ ...newStore, name: e.target.value })} placeholder="store name, e.g. Longs" className={input} />
-        <div className="flex gap-2">
-          <select value={newStore.city_id} onChange={(e) => setNewStore({ ...newStore, city_id: e.target.value })} className={input}>
-            <option value="">city…</option>
-            {db.cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            <option value="online">Online (no city)</option>
-          </select>
-          <input value={newStore.note} onChange={(e) => setNewStore({ ...newStore, note: e.target.value })} placeholder="location note" className={input} />
+        <div className="mt-4 space-y-2 rounded-xl border-2 border-dashed border-rule-2 p-3.5">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[.08em] text-ink-soft">Add a city</p>
+          <div className="flex gap-2">
+            <input value={newCity.name} onChange={(e) => setNewCity({ ...newCity, name: e.target.value })} placeholder="city name" className={input} />
+            <select value={newCity.island_id} onChange={(e) => setNewCity({ ...newCity, island_id: e.target.value })} className={input}>
+              <option value="">island…</option>
+              {db.islands.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+            </select>
+          </div>
+          <GhostButton className="w-full" onClick={addCity}>+ Add city</GhostButton>
+
+          <p className="pt-2 font-mono text-[11px] font-bold uppercase tracking-[.08em] text-ink-soft">Add a store (name + city)</p>
+          <input value={newStore.name} onChange={(e) => setNewStore({ ...newStore, name: e.target.value })} placeholder="store name, e.g. Longs" className={input} />
+          <div className="flex gap-2">
+            <select value={newStore.city_id} onChange={(e) => setNewStore({ ...newStore, city_id: e.target.value })} className={input}>
+              <option value="">city…</option>
+              {db.cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              <option value="online">Online (no city)</option>
+            </select>
+            <input value={newStore.note} onChange={(e) => setNewStore({ ...newStore, note: e.target.value })} placeholder="location note" className={input} />
+          </div>
+          <GhostButton className="w-full" onClick={addStore}>+ Add store</GhostButton>
         </div>
-        <GhostButton className="w-full" onClick={addStore}>+ Add store</GhostButton>
-      </Card>
 
-      <SectionHeader>Data</SectionHeader>
-      <Card className="space-y-3 p-3">
-        <p className="text-sm">
-          Mode:{' '}
-          {store.mode === 'local' ? (
-            <Badge tone="amber">local demo (this device only)</Badge>
-          ) : (
-            <Badge tone="green">Supabase connected</Badge>
+        <SectionHeader>Data</SectionHeader>
+        <div className="space-y-3 pt-1">
+          <p className="flex items-center gap-2 text-sm font-bold">
+            Mode:{' '}
+            {store.mode === 'local' ? (
+              <Badge tone="amber">local demo — this device only</Badge>
+            ) : (
+              <Badge tone="green">Supabase connected</Badge>
+            )}
+          </p>
+          <p className="font-mono text-[11px] font-medium leading-4 text-ink-soft">
+            To go live: create a Supabase project, run supabase/schema.sql, then set VITE_SUPABASE_URL and
+            VITE_SUPABASE_ANON_KEY in .env.local. Every household device signs into the one shared account
+            (v1 — see DECISIONS.md).
+          </p>
+          <GhostButton className="w-full" onClick={reset}>↺ Reset demo data</GhostButton>
+          {isAuthCapable(store) && (
+            <GhostButton className="w-full" onClick={() => isAuthCapable(store) && store.signOut()}>
+              Sign out of this device
+            </GhostButton>
           )}
-        </p>
-        <p className="text-xs text-stone-500">
-          To go live: create a Supabase project, run <code>supabase/schema.sql</code>, then set{' '}
-          <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> in <code>.env.local</code>. Every
-          household device signs into the one shared account (v1 — see DECISIONS.md).
-        </p>
-        <GhostButton className="w-full" onClick={reset}>↺ Reset demo data</GhostButton>
-        {isAuthCapable(store) && (
-          <GhostButton className="w-full" onClick={() => isAuthCapable(store) && store.signOut()}>
-            ⎋ Sign out of this device
-          </GhostButton>
-        )}
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

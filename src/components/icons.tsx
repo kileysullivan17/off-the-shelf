@@ -67,6 +67,19 @@ export const SearchIcon = (p: { size?: number; className?: string }) => (
     <path d="M15.8 15.8L21 21" />
   </svg>
 )
+export const RouteIcon = (p: { size?: number; className?: string }) => (
+  <svg width={p.size ?? 20} height={p.size ?? 20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 ${p.className ?? ''}`} aria-hidden>
+    <path d="M4 18c0-6 4-6 8-6s8 0 8-6" />
+    <circle cx="4" cy="18" r="2.2" />
+    <circle cx="20" cy="6" r="2.2" />
+  </svg>
+)
+export const StaplesIcon = (p: { size?: number; className?: string }) => (
+  <Svg {...p} size={p.size ?? 20} strokeWidth={2.3} d="M12 4v16M4 12h16M6.5 6.5l11 11M17.5 6.5l-11 11" />
+)
+export const DotsIcon = (p: { size?: number; className?: string }) => (
+  <Svg {...p} size={p.size ?? 20} strokeWidth={2.6} d="M5 12h.01M12 12h.01M19 12h.01" />
+)
 export const ClockIcon = (p: { size?: number; className?: string }) => (
   <svg width={p.size ?? 14} height={p.size ?? 14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" className={`shrink-0 ${p.className ?? ''}`} aria-hidden>
     <circle cx="12" cy="12" r="8.5" />

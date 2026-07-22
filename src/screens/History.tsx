@@ -3,15 +3,10 @@ import { useSearchParams } from 'react-router-dom'
 import { useDB, useMutate } from '../lib/store'
 import { memberName, storeById, storeLabel } from '../lib/tripLogic'
 import { norm, type PurchaseRecord, type Reaction } from '../lib/types'
-import { Badge, Card, EmptyState, GhostButton, PrimaryButton, Sheet, StarRating, useToast } from '../components/ui'
+import { EmptyState, PrimaryButton, Sheet, StarRating, useToast } from '../components/ui'
+import { SearchIcon } from '../components/icons'
 
-const OUTCOME_BADGE = {
-  loved: { tone: 'green' as const, label: '❤️ loved' },
-  bought: { tone: 'stone' as const, label: 'bought' },
-  disliked: { tone: 'red' as const, label: '👎 disliked' },
-}
-
-const REACTION_EMOJI: Record<Reaction, string> = { liked: '👍', disliked: '👎', neutral: '😐' }
+const REACTION_GLYPH: Record<Reaction, string> = { liked: '▲', disliked: '▼', neutral: '·' }
 
 /** Purchase memory (behavior 5): what was tried, when, where, who thought what. */
 export function History() {
@@ -54,70 +49,97 @@ export function History() {
     showToast('Reaction saved ✓')
   }
 
+  /** Verdict band: strongest signal first — any dislike wins, then loved. */
+  const verdict = (p: PurchaseRecord) => {
+    const disliked = p.outcome === 'disliked' || p.reactions.some((r) => r.reaction === 'disliked')
+    if (disliked) return 'disliked'
+    if (p.outcome === 'loved' || p.reactions.some((r) => r.reaction === 'liked')) return 'loved'
+    return null
+  }
+
   return (
-    <div className="p-4">
+    <div>
       {toast}
-      <h1 className="mb-1 text-2xl font-bold">History</h1>
-      <p className="mb-3 text-sm text-stone-500">The household memory — search before you grab.</p>
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="🔎 e.g. ramen"
-        className="mb-4 w-full rounded-xl border border-stone-300 bg-white px-3 py-3"
-      />
+      <div className="border-b border-rule px-4 pb-3.5 pt-4">
+        <h1 className="text-[28px] font-extrabold leading-8 tracking-tight">Memory</h1>
+        <div className="mt-3 flex items-center gap-2.5 rounded-xl border-2 border-ink px-3.5 py-3">
+          <SearchIcon size={17} />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="have we tried… ramen?"
+            className="min-w-0 flex-1 bg-transparent text-[17px] font-bold outline-none placeholder:font-semibold placeholder:text-ink-mute"
+          />
+          {query && (
+            <span className="font-mono text-[11px] font-semibold text-ink-soft">
+              {groups.length} tried
+            </span>
+          )}
+        </div>
+      </div>
 
-      {groups.length === 0 && <EmptyState>No purchases match{query ? ` “${query}”` : ''} yet.</EmptyState>}
+      <div className="space-y-4 px-4 py-4">
+        {groups.length === 0 && <EmptyState>No purchases match{query ? ` “${query}”` : ''} yet — first time for everything.</EmptyState>}
 
-      {groups.map((records) => (
-        <div key={records[0].item_name} className="mb-5">
-          <h2 className="mb-2 px-1 text-lg font-bold capitalize">{records[0].item_name}</h2>
-          <div className="space-y-2">
-            {records.map((p) => {
-              const store = storeById(db, p.store_id)
-              const badge = OUTCOME_BADGE[p.outcome]
-              return (
-                <Card key={p.id} className="p-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-medium text-stone-600">
-                        {new Date(p.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                        {store && <> · {storeLabel(db, store)}</>}
-                        {p.aisle_code && <> · aisle {p.aisle_code}</>}
-                      </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                        <Badge tone={badge.tone}>{badge.label}</Badge>
-                        {p.rating != null && <StarRating value={p.rating} />}
+        {groups.map((records) => (
+          <div key={records[0].item_name}>
+            <h2 className="mb-2 px-0.5 text-[17px] font-extrabold capitalize tracking-tight">{records[0].item_name}</h2>
+            <div className="space-y-2.5">
+              {records.map((p) => {
+                const store = storeById(db, p.store_id)
+                const v = verdict(p)
+                const dislikeNote = p.reactions.find((r) => r.reaction === 'disliked')
+                return (
+                  <div key={p.id} className="overflow-hidden rounded-xl border-[1.5px] border-rule-2">
+                    {v === 'loved' && (
+                      <div className="flex items-center gap-2 bg-bought px-3 py-1.5 font-mono text-[11px] font-extrabold uppercase tracking-[.08em] text-paper">
+                        ▲ Get again
+                      </div>
+                    )}
+                    {v === 'disliked' && (
+                      <div className="flex items-center gap-2 bg-danger px-3 py-1.5 font-mono text-[11px] font-extrabold uppercase tracking-[.06em] text-paper">
+                        ▼ Disliked{dislikeNote?.note ? ` — “${dislikeNote.note}”` : ''}
+                      </div>
+                    )}
+                    <div className="p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-mono text-[11px] font-semibold uppercase tracking-[.04em] text-ink-soft">
+                          {new Date(p.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                          {store && <> · {storeLabel(db, store)}</>}
+                          {p.aisle_code && <> · {p.aisle_code}</>}
+                        </p>
+                        {p.photo && <img src={p.photo} alt="" className="h-12 w-12 rounded-lg object-cover" />}
+                      </div>
+                      {p.rating != null && <div className="mt-1"><StarRating value={p.rating} /></div>}
+                      {p.note && <p className="mt-1.5 text-sm font-semibold">{p.note}</p>}
+                      {p.reactions.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {p.reactions.map((r) => (
+                            <p key={r.member_id} className="font-mono text-[12px] font-bold">
+                              {REACTION_GLYPH[r.reaction]} {memberName(db, r.member_id)?.toUpperCase()}
+                              {r.note && <span className="font-semibold text-ink-soft"> — “{r.note}”</span>}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                      <div className="mt-2.5">
+                        <button
+                          onClick={() =>
+                            setReactSheet({ record: p, member_id: db.members[0]?.id ?? '', reaction: 'liked', note: '' })
+                          }
+                          className="rounded-full border-[1.5px] border-rule-2 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[.06em] text-ink-soft"
+                        >
+                          + member reaction
+                        </button>
                       </div>
                     </div>
-                    {p.photo && <img src={p.photo} alt="" className="h-12 w-12 rounded-lg object-cover" />}
                   </div>
-                  {p.note && <p className="mt-1.5 text-sm text-stone-700">{p.note}</p>}
-                  {p.reactions.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {p.reactions.map((r) => (
-                        <p key={r.member_id} className="text-sm">
-                          {REACTION_EMOJI[r.reaction]} <span className="font-semibold">{memberName(db, r.member_id)}</span>
-                          {r.note && <span className="text-stone-600"> — {r.note}</span>}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                  <div className="mt-2">
-                    <GhostButton
-                      onClick={() =>
-                        setReactSheet({ record: p, member_id: db.members[0]?.id ?? '', reaction: 'liked', note: '' })
-                      }
-                      className="!py-1.5 text-xs"
-                    >
-                      + member reaction
-                    </GhostButton>
-                  </div>
-                </Card>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       <Sheet open={!!reactSheet} onClose={() => setReactSheet(null)} title="Who tried it?">
         {reactSheet && (
@@ -127,8 +149,8 @@ export function History() {
                 <button
                   key={m.id}
                   onClick={() => setReactSheet({ ...reactSheet, member_id: m.id })}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold ${
-                    reactSheet.member_id === m.id ? 'bg-brand-700 text-white' : 'border border-stone-300 bg-white'
+                  className={`rounded-full px-4 py-2 font-mono text-[12px] font-extrabold uppercase tracking-[.06em] ${
+                    reactSheet.member_id === m.id ? 'bg-ink text-paper' : 'border-[1.5px] border-rule-2 text-ink-soft'
                   }`}
                 >
                   {m.name}
@@ -140,11 +162,11 @@ export function History() {
                 <button
                   key={r}
                   onClick={() => setReactSheet({ ...reactSheet, reaction: r })}
-                  className={`flex-1 rounded-xl border px-3 py-3 text-sm font-medium ${
-                    reactSheet.reaction === r ? 'border-brand-700 bg-brand-50' : 'border-stone-300 bg-white'
+                  className={`min-h-[48px] flex-1 rounded-xl border-2 px-3 py-3 font-mono text-[12px] font-bold uppercase tracking-[.04em] ${
+                    reactSheet.reaction === r ? 'border-violet-deep bg-violet-tint text-violet-deep' : 'border-rule-2 text-ink-soft'
                   }`}
                 >
-                  {REACTION_EMOJI[r]} {r}
+                  {REACTION_GLYPH[r]} {r}
                 </button>
               ))}
             </div>
@@ -152,7 +174,7 @@ export function History() {
               value={reactSheet.note}
               onChange={(e) => setReactSheet({ ...reactSheet, note: e.target.value })}
               placeholder='note, e.g. “too spicy”'
-              className="w-full rounded-xl border border-stone-300 px-3 py-3"
+              className="w-full rounded-[10px] border-2 border-ink bg-paper px-3.5 py-3 text-base font-bold placeholder:font-semibold placeholder:text-ink-mute"
             />
             <PrimaryButton className="w-full" onClick={saveReaction} disabled={!reactSheet.member_id}>
               Save reaction

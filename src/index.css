@@ -55,13 +55,6 @@
   /* on-ink surfaces (pills, dark buttons, toasts) */
   --color-lavender: #c9b8f2; /* accent text on ink — replaces the mustard */
 
-  /* legacy aliases — screens migrate off these in the screen-retint commits */
-  --color-brand-50: #ede8fa;
-  --color-brand-100: #ede8fa;
-  --color-brand-600: #6d4ac9;
-  --color-brand-700: #5b3bae;
-  --color-brand-800: #4a2fa6;
-
   /* type — Archivo for UI, IBM Plex Mono for codes/meta */
   --font-sans: 'Archivo', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;

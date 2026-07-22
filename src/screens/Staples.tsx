@@ -1,7 +1,8 @@
 import { useDB, useMutate } from '../lib/store'
 import { memberName } from '../lib/tripLogic'
 import type { Item } from '../lib/types'
-import { Badge, Card, EmptyState, PrimaryButton, useToast } from '../components/ui'
+import { EmptyState, useToast } from '../components/ui'
+import { CheckIcon, PlusIcon } from '../components/icons'
 
 /** One-tap re-add of household staples (behavior 4). */
 export function Staples() {
@@ -35,47 +36,62 @@ export function Staples() {
   }
 
   return (
-    <div className="p-4">
+    <div>
       {toast}
-      <div className="mb-1 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Staples</h1>
-        {missing.length > 0 && (
-          <button onClick={readdAll} className="text-sm font-semibold text-brand-700">
-            Re-add all ({missing.length})
-          </button>
-        )}
-      </div>
-      <p className="mb-4 text-sm text-stone-500">One tap puts a staple back on the needed list.</p>
-
-      {staples.length === 0 && <EmptyState>No staples yet — mark items as staples when adding.</EmptyState>}
-
-      {[...byStore.entries()].map(([storeName, items]) => (
-        <div key={storeName} className="mb-4">
-          <h2 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-stone-500">{storeName}</h2>
-          <Card>
-            {items.map((item, i) => {
-              const member = memberName(db, item.member_id)
-              const onList = !needsAdding(item)
-              return (
-                <div key={item.id} className={`flex items-center gap-3 px-3 py-3 ${i > 0 ? 'border-t border-stone-100' : ''}`}>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">{item.name}</p>
-                    <div className="mt-0.5 flex flex-wrap gap-1">
-                      {member && <Badge tone="teal">{member}</Badge>}
-                      {item.status === 'parked' && <Badge tone="stone">parked</Badge>}
-                    </div>
-                  </div>
-                  {onList ? (
-                    <Badge tone="green">on the list ✓</Badge>
-                  ) : (
-                    <PrimaryButton onClick={() => readd(item)} className="!px-3 !py-2 text-sm">+ Add</PrimaryButton>
-                  )}
-                </div>
-              )
-            })}
-          </Card>
+      <div className="border-b border-rule px-4 pb-3.5 pt-4">
+        <div className="flex items-baseline justify-between">
+          <h1 className="text-[28px] font-extrabold leading-8 tracking-tight">Staples</h1>
+          {missing.length > 0 && (
+            <button
+              onClick={readdAll}
+              className="rounded-full border-[1.5px] border-rule-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[.04em] text-ink-soft"
+            >
+              Re-add all ({missing.length})
+            </button>
+          )}
         </div>
-      ))}
+        <p className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-[.06em] text-ink-soft">
+          Tap a cell → back on its store’s list
+        </p>
+      </div>
+
+      <div className="px-4 pb-4">
+        {staples.length === 0 && <EmptyState>No staples yet — mark items as staples when adding.</EmptyState>}
+
+        {[...byStore.entries()].map(([storeName, items]) => (
+          <div key={storeName} className="mt-4">
+            <h2 className="mb-2 px-0.5 font-mono text-[11px] font-bold uppercase tracking-[.1em] text-ink-soft">{storeName}</h2>
+            <div className="grid grid-cols-2 gap-2.5">
+              {items.map((item) => {
+                const member = memberName(db, item.member_id)
+                const onList = !needsAdding(item)
+                return onList ? (
+                  <div key={item.id} className="min-h-[74px] rounded-xl bg-ink p-3">
+                    <p className="text-[15px] font-extrabold leading-[19px] tracking-tight text-paper">{item.name}</p>
+                    <p className="mt-2 flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[.06em] text-lavender">
+                      <CheckIcon size={10} /> in list
+                    </p>
+                  </div>
+                ) : (
+                  <button
+                    key={item.id}
+                    onClick={() => readd(item)}
+                    className="relative min-h-[74px] rounded-xl border-[1.5px] border-rule-2 p-3 text-left active:bg-tint"
+                  >
+                    <p className="text-[15px] font-extrabold leading-[19px] tracking-tight">{item.name}</p>
+                    <p className="mt-1.5 font-mono text-[10px] font-semibold uppercase tracking-[.04em] text-ink-soft">
+                      {item.status === 'parked' ? 'parked' : member || ' '}
+                    </p>
+                    <span className="absolute bottom-2.5 right-2.5 flex h-[26px] w-[26px] items-center justify-center rounded-lg border-2 border-ink">
+                      <PlusIcon size={13} />
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
