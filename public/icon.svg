@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Off the Shelf mark: the bought status box, flat violet (never the gradient at icon sizes) -->
   <rect width="512" height="512" rx="96" fill="#6d4ac9"/>
-  <text x="256" y="330" font-size="240" text-anchor="middle">🛒</text>
-  <text x="256" y="120" font-size="72" text-anchor="middle">🌴</text>
+  <rect x="116" y="116" width="280" height="280" rx="64" fill="#f7f9fa"/>
+  <path d="M168.5 263L222.2 316.7L343.6 195.3" fill="none" stroke="#6d4ac9" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
