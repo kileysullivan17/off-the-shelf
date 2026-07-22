@@ -1,4 +1,4 @@
-# DECISIONS.md — Island Shopping Companion
+# DECISIONS.md — Off the Shelf
 
 Judgment calls made during the autonomous build, most recent last.
 "Cheap and reversible" decisions were made and logged; anything expensive
@@ -159,3 +159,13 @@ checklist text AAA):
 - brand-* aliases point at the violet ramp so unmigrated screens render the
   new hue; the aliases are removed once the screen retint commits land.
 Reversible: yes — tokens are one block in src/index.css.
+
+## D23 — Project renamed to Off the Shelf everywhere (2026-07-22)
+Owner renamed the Vercel project; local names follow: package.json/lockfile
+name, README, DECISIONS header, .vercel link metadata. Deliberately NOT
+renamed: the localStorage key 'island-shopping-db-v1' in LocalStore.ts
+(renaming would orphan existing demo data on devices — it is an internal
+key, invisible to users), and historical entries/screenshot filenames that
+record the old URL as it was. The old-name production URL stops working
+after the Vercel rename; update any home-screen PWA installs by re-adding
+from the new URL.

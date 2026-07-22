@@ -1,6 +1,7 @@
-# Island Shopping Companion
+# Off the Shelf
 
-A mobile-first household shopping companion built around how shopping on
+A mobile-first household shopping companion (formerly "Island Shopping
+Companion") built around how shopping on
 Hawaii Island actually works: stores live in different cities, a shopping day
 is a **city run** hitting several stores in one trip, heat-safe purchases come
 first and perishables last, and a **purchase memory** remembers what every
@@ -24,10 +25,6 @@ npm run build      # typecheck + production build
 Opens in **local demo mode**: the full seed (Hilo + Kona stores, members
 M1–M4, staples, aisle codes, deep purchase history) lives in localStorage on
 first load. Settings → “Reset demo data” restores it anytime.
-
-> **Note on committing:** system git is broken on this machine (missing Xcode
-> CLT). Use `npm run commit -- "message"` / `node scripts/commit.mjs "message"`
-> — real git commits via isomorphic-git.
 
 ## Going live on Supabase (when you're ready)
 
@@ -81,8 +78,8 @@ UI is identical in both modes.
 
 - **One shared household account** — no per-user auth, roles, or realtime
   presence. Schema designed so multi-user is additive (see DECISIONS.md D11).
-- **No deploy** — stopped before steps requiring owner accounts (Supabase,
-  Vercel). Everything is ready: `vercel` + two env vars.
+- **Deployed** — live on Vercel as a PWA in the cool-violet "Off the Shelf"
+  design (see design/ for the retint package and verify screenshots).
 - **Trips/reactions as jsonb** rather than child tables (D6).
 - Aisle input at add-time only for pinned items; flexible items learn aisles
   at buy-time (D15).
