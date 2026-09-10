@@ -172,3 +172,117 @@ existing home-screen PWA installs keep working. Caveat found later:
 off-the-shelf.vercel.app itself was already owned by an unrelated project
 (the .vercel.app namespace is global), so the canonical public URL is
 offtheshelf.vercel.app, attached 2026-07-22.
+
+## D24 — The adoption diagnosis was imprecise; correcting it changed the roadmap (2026-09-09)
+**Supersedes the previous framing.** It was recorded as: the household leaves for
+the store in a rush against a deadline, so anything requiring setup before the
+trip loses to just going. That reads as *setup costs too much*, and the next
+iteration was scoped accordingly (ingest store maps, produce a per-store plan
+before arrival).
+**What is actually true:** setup is acceptable when it happens a day or more
+ahead. What fails is setup that must happen in the few minutes before leaving.
+The constraint is WHEN the work is required, not how much of it there is.
+**Why it decides the roadmap:** if setup is too expensive you eliminate it, and
+store maps are the obvious move. If setup is merely mistimed, store-map
+ingestion is actively wrong, because ingesting a map is itself more setup landing
+in the window that is already failing.
+**Consequence:** store-map ingestion is removed from the next iteration. Later
+problem, not a dead one, and it only pays off once the app is opened at all.
+**Falsifier:** if setup done a day ahead also fails to happen, the constraint is
+motivation rather than timing, and neither diagnosis is the real problem.
+
+## D25 — The app should never be empty (2026-09-09)
+**Decision:** opening cold, with no preparation, should yield a plausible list.
+Purchase memory already exists and already knows what the household buys.
+**Reasoning:** this removes a precondition rather than adding a feature. Every
+other candidate change moves setup work around; this deletes the requirement
+that any work happened, which is the only thing that makes the pre-trip window
+survivable under D24.
+
+## D26 — Walk order is learned from purchase timestamps, not assumed from aisle-code order (2026-09-09)
+**Refines D9, which sorts by natural aisle-code order (G37 → G,37).** That sort
+assumes aisle-code order matches the order the store is actually walked. It
+often will not: numbering runs along one axis, and the route through a store
+depends on entrance position, department layout, and habit.
+**Decision:** derive the real walk order per store from the `date` column on
+`purchases`, which is already `timestamptz default now()`. One trip yields one
+ordering; several yield pairwise precedences that aggregate into a consensus
+order. Fall back to D9's code sort where evidence is thin.
+**Cost: no schema change.** `purchases.date` and `purchases.aisle_code` already
+exist and are already written on every buy. This is a derivation over data the
+app captures today, not new capture.
+**Relationship to D4 and D15, which stay as they are.** `item_aisles` remains the
+absolute anchor: a code learned at a location survives walking the store
+backwards or doubling back, and transfers to newly added items without waiting
+for a trip. Learned sequence describes the order aisles are actually visited.
+The two compose; neither replaces the other.
+**Known risk, and it is behavioural rather than technical:** this only works if
+items are marked bought as they enter the cart, not batched at the car. If they
+are batched there is no signal. Mitigation: detect batches (many buys inside a
+few seconds) and discard them as ordering evidence rather than letting them
+corrupt the model.
+**Second risk:** retailers reset shelves seasonally, so weight recent trips more
+heavily than old ones.
+**Falsifier:** purchase timestamps arriving batched rather than distributed
+across a trip. Observable from the first real trip, and it invalidates the whole
+approach cheaply.
+
+## D27 — Indoor positioning rejected; store layout is a sequence, not a map (2026-09-09)
+**Considered and rejected:** logging device location while shopping to build a
+store map.
+**Why it does not work.** Grocery aisles sit roughly 3 to 4 metres apart and are
+1.2 to 1.5 metres wide. Consumer GPS is 3 to 5 metres in open sky and degrades
+further indoors, where signal reflects off steel shelving and a metal roof. It
+cannot resolve aisle 4 from aisle 6, which is the only distinction that matters.
+Technologies that do work indoors need infrastructure outside this project's
+control: BLE beacons installed by the retailer, Wi-Fi fingerprinting with a
+survey phase and scan APIs iOS does not expose to third-party apps, or magnetic
+fingerprinting which also needs a survey.
+**The reframe that removes the problem:** routing never requires knowing that
+milk sits at x=12.3, y=4.1. It requires knowing that milk comes before bread
+comes before eggs. That is an ordering, and D26 obtains it for free.
+**Cost of the chosen path:** no location permission, no battery drain, no
+beacons, no survey, no retailer cooperation.
+
+## D28 — External retailer data is an optional accelerant, never a foundation (2026-09-09)
+**Decision:** no external retailer API sits on the critical path. Such an
+integration may only pre-populate `item_aisles` for a system that already works
+without it.
+**What was investigated.** Kroger publishes a developer portal exposing
+store-level product data and is the one major chain with a sanctioned public
+route. It does not operate in Hawaii, so it is unavailable for every store this
+app is used in. Target's own app displays aisle locations, so the data exists,
+but there is no sanctioned public API; the commonly used route is RedSky,
+Target's internal API, which is undocumented, reverse-engineered, unsupported
+and not a sanctioned integration. Paid third-party resellers are the same data
+behind a scraping layer. No Hawaii-local chain (KTA, Foodland, Times) publishes
+anything, and none plausibly will.
+**Two reasons it stays off the critical path.**
+1. Fragility lands in the worst place. An undocumented dependency will break, and
+   when it does the app degrades silently in the minutes before a trip, which is
+   the exact failure mode D24 exists to fix.
+2. Coverage does not work. The unit is a city run across multiple stores. Target
+   is one store of five or six; a Target-only solution yields two code paths, one
+   store that behaves well and five that do not.
+**Resulting architecture, which inverts the usual instinct:** the manual and
+learned path (D4, D26) is the reliable substrate. An API, if ever added, is a
+seeder that lets one store start warm; if it breaks, that store degrades to
+learn-as-you-go like every other store.
+**Noted for later:** `item_aisles` rows are a shared asset. With more than one
+household, one person's tagging at a given store benefits every other shopper
+there, and coverage solves itself through use rather than through an API.
+Premature under D11's single-account model; worth having written down.
+
+## D29 — Build order, and why this order (2026-09-09)
+1. **Learned sequence from existing purchase timestamps (D26).** No schema
+   change, no new capture, no new UI. Tests the one behavioural assumption
+   everything else rests on.
+2. **Aisle-capture friction work on top of D4 and D15.** Only if timestamps
+   arrive distributed rather than batched.
+3. **Retailer API seeding, Target only (D28).** Optional, last, and only once the
+   thing it accelerates already works.
+**Principle:** ship the step that validates the load-bearing assumption before
+building anything resting on it. Step 3 is also the easiest to cut, which is a
+good sign it is correctly placed.
+**Selected 2026-09-09: step 1 only.** Steps 2 and 3 are explicitly not authorised
+until the purchase-timestamp distribution has been observed.
